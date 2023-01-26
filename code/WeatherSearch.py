@@ -1,222 +1,293 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import tkinter as tk
+import datetime as dt
+from fmiopendata.wfs import download_stored_query
+
+"""csv tiedosto haettu ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations 
+Nimetty Weather_Data202212_1h.csv ja tallenettu samaan kansioon koodin kanssa. Koneluetttava haku löytyy samoin 
+ilmatieteenlaitoksen verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data """
+
 df = pd.read_csv('Weather_Data202212_1h.csv')
 df = df[:-1] # pandas taulukon viimeinen rivi pois
 
-HakuTulokset = []
+seekresults = []
 
-class SaaTulostus:
-    def tulostus_haku(self, HakuTulokset):
-        for haku in HakuTulokset:
+class WeatherResult:
+    def results_seek(self, seekresults):
+        
+        for weather in seekresults:
             print()
-            print("**************************************")
-            print("Sää tiedon haku tulokset joulukuu 2022")   
+            print("********************************")
+            print("Sään haku tulokset joulukuu 2022")   
             print("Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema")
             print("***************************************************************")
-            print(f"{haku.haut}. Haku joulukuun {haku.paiva} päivä kellon ajalle {haku.klo}")
-            print(f"{haku.tulosta_haku()}")
+            print(f"{weather.seekid}. Haku joulukuun {weather.day} päivä kellon ajalle {weather.time}")
+            print(f"{weather.print_seek()}")
             print()
+         
 
-class SaaHaku:
-    def __init__(self, haut, paiva, klo):
-        self.haut = haut
-        self.paiva = paiva
-        self.klo = klo
-
-    def ask_paiva(self):
-        def paiva_tarkistus():
+class WeatherSeek:
+    def __init__(self, seekid, day, time):
+        self.seekid = seekid
+        self.day = day
+        self.time = time
+       
+    def ask_day(self):
+        def day_check():
             while True:
                 try:
-                    paiva = int(input("Anna haku päivä (1-31): "))
-                    if paiva >= 1 and paiva <= 31:
-                        return int(paiva) # palutetaan päivän haku arvo funktiolle
+                    day = int(input("Anna haku päivä (1-31): "))
+                    if day >= 1 and day <= 31:
+                        return int(day) # palutetaan päivän haku arvo funktiolle
                     else:
                         print()
-                        print("Virheellinen syöte. Anna oikea päivä kiitos.")
+                        print("Virheellinen syöte. Anna oikea päivä, kiitos.")
                         print()
                 except ValueError:
                     print()
-                    print("Virheellinen syöte. Anna luku päivänä kiitos.")
+                    print("Virheellinen syöte. Anna luku, kiitos.")
                     print()
-        self.paiva = paiva_tarkistus()    
+        self.day = day_check()    
 
-    def ask_klo(self):
+    def ask_time(self):
         while True:
-            klo = str(input("Anna haun kellon aika(HUOM! haku aika tasa tunnein 00:00 muodossa): "))
+            time = str(input("Anna haun kellon aika(HUOM! haku aika tasa tunnein 00:00 muodossa): "))
             result = ["00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00",
             "12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
-            kloTemp = []
-            kloTemp.append(klo)
-            if any(same_value in result for same_value in kloTemp): # jos sama arvo löytyy molemmista taulukoista klo syöte ok. 
-                self.klo = klo
+            timetemp = []
+            timetemp.append(time)
+            if any(same_value in result for same_value in timetemp): # jos sama arvo löytyy molemmista taulukoista klo syöte ok. 
+                self.time = time
                 break
             else:
                 print()
-                print("virheellinen syöte kellon ajassa")
+                print("Virheellinen syöte kellon ajassa")
                 print()
 
-class Lampotila(SaaHaku):
-    def __init__(self, haut, paiva, klo, lampotilan_tulostus):
-        super().__init__(haut, paiva, klo)
-        self.lampotila_tulos = lampotilan_tulostus
+class Temperature(WeatherSeek):
+    def __init__(self, seekid, day, time, temperature_results):
+        super().__init__(seekid, day, time)
+        self.temperature_result = temperature_results
 
-    def tee_haku(self):
-        paiva_1 = df[df["Klo"] == self.klo] # pandas taulukko parsitaan annetulla klo arvolla
-        paiva_2 = paiva_1[paiva_1["Pv"] == self.paiva] #parsitaan annetulla paivan arvolla  
+    def make_seek(self):
+        
+        day_1 = df[df["Time"] == self.time] # pandas taulukko parsitaan annetulla klo arvolla
+        day_2 = day_1[day_1["d"] == self.day] #parsitaan annetulla paivan arvolla  
     
-        a = paiva_2["Ilman lämpötila (degC)"] # valitaan parsitulta riviltä lämpötila
+        a = day_2["Air temperature (degC)"] # valitaan parsitulta riviltä lämpötila
         a = (a.to_string(index=False)) # Tulostuksen muotoilu pandas taulukon indeksi numerointi pois
-        lampotilan_tulostus = (f"Lämpötila {a} astetta")
-        self.lampotila_tulos = lampotilan_tulostus 
+        temperature_results = (f"Lämpötila {a} astetta")
+        self.temperature_result = temperature_results 
 
-    def tulosta_haku(self):
-        return self.lampotila_tulos
+    def print_seek(self):
+        return self.temperature_result
 
-class Sademaara(SaaHaku):
-    def __init__(self, haut, paiva, klo, sademaaran_tulostus):
-        super().__init__(haut, paiva, klo)
-        self.sademaara_tulos = sademaaran_tulostus
+class Rainfall(WeatherSeek):
+    def __init__(self, seekid, day, time, rainfall_results):
+        super().__init__(seekid, day, time)
+        self.rainfall_result = rainfall_results
 
-    def tee_haku(self):
-        paiva_1 = df[df["Klo"] == self.klo]
-        paiva_2 = paiva_1[paiva_1["Pv"] == self.paiva]
+    def make_seek(self):
+        day_1 = df[df["Time"] == self.time]
+        day_2 = day_1[day_1["d"] == self.day]
 
-        a = paiva_2["Sademäärä (mm)"]
+        a = day_2["Precipitation amount (mm)"]
         a = (a.to_string(index=False))
-        sademaaran_tulostus = (f"Sademäärä {a} mm")
-        self.sademaara_tulos = sademaaran_tulostus
+        rainfall_results = (f"Sademäärä {a} mm")
+        self.rainfall_result = rainfall_results
 
-    def tulosta_haku(self):
-        return self.sademaara_tulos
+    def print_seek(self):
+        return self.rainfall_result
 
-class TuulenNopeus(SaaHaku):
-    def __init__(self, haut, paiva, klo, tuulennopeus_tulostus):
-        super().__init__(haut, paiva, klo)
-        self.tuulennopeus_tulos = tuulennopeus_tulostus
+class WindSpeed(WeatherSeek):
+    def __init__(self, seekid, day, time, windspeed_results):
+        super().__init__(seekid, day, time)
+        self.windspeed_result = windspeed_results
         
-    def tee_haku(self):
-        paiva_1 = df[df["Klo"] == self.klo]
-        paiva_2 = paiva_1[paiva_1["Pv"] == self.paiva]
+    def make_seek(self):
+        day_1 = df[df["Time"] == self.time]
+        day_2 = day_1[day_1["d"] == self.day]
 
-        a = paiva_2["Tuulen nopeus (m/s)"]
+        a = day_2["Wind speed (m/s)"]
         a = (a.to_string(index=False))
-        tuulennopeus_tulostus = (f"Tuulen nopeus {a} m/s")
-        self.tuulennopeus_tulos = tuulennopeus_tulostus
+        windspeed_results = (f"Tuulen nopeus {a} m/s")
+        self.windspeed_result = windspeed_results
 
-    def tulosta_haku(self):
-        return self.tuulennopeus_tulos
+    def print_seek(self):
+        return self.windspeed_result
 
-class TuuliPuuskassa(SaaHaku):
-    def __init__(self, haut, paiva, klo, tuulipuuskassa_tulostus):
-        super().__init__(haut, paiva, klo)
-        self.tuulipuuskassa_tulos = tuulipuuskassa_tulostus
+class GustWind(WeatherSeek):
+    def __init__(self, seekid, day, time, gustwind_results):
+        super().__init__(seekid, day, time)
+        self.gustwind_result = gustwind_results
        
-    def tee_haku(self):
-        paiva_1 = df[df["Klo"] == self.klo]
-        paiva_2 = paiva_1[paiva_1["Pv"] == self.paiva]
+    def make_seek(self):
+        day_1 = df[df["Time"] == self.time]
+        day_2 = day_1[day_1["d"] == self.day]
 
-        a = paiva_2["Puuskanopeus (m/s)"]
+        a = day_2["Gust speed (m/s)"]
         a = (a.to_string(index=False))
-        tuulipuuskassa_tulostus = (f"Tuuli puuskassa {a} m/s")
-        self.tuulipuuskassa_tulos = tuulipuuskassa_tulostus
+        gustwind_results = (f"Tuuli puuskassa {a} m/s")
+        self.gustwind_result = gustwind_results
 
-    def tulosta_haku(self):
-        return self.tuulipuuskassa_tulos  
+    def print_seek(self):
+        return self.gustwind_result  
 
-class TuuliSuunta(SaaHaku):
-    def __init__(self, haut, paiva, klo, tuulisuunta_tulostus):
-        super().__init__(haut, paiva, klo)
-        self.tuulisuunta_tulos = tuulisuunta_tulostus
+class WindDirection(WeatherSeek):
+    def __init__(self, seekid, day, time, winddirection_results):
+        super().__init__(seekid, day, time)
+        self.winddirection_result = winddirection_results
         
-    def tee_haku(self): 
-        paiva_1 = df[df["Klo"] == self.klo]
-        paiva_2 = paiva_1[paiva_1["Pv"] == self.paiva]
+    def make_seek(self): 
+        day_1 = df[df["Time"] == self.time]
+        day_2 = day_1[day_1["d"] == self.day]
 
-        a = paiva_2["Tuulen suunta (deg)"]
-        a = int(a.to_string(index=False)) # varmistetaan muuttujan int tyyppi if hakua varten
+        a = day_2["Wind direction (deg)"]
+        a = int(a.to_string(index=False)) # vaihdetaan muuttujan int tyyppi if hakua varten
 
         if (a >= 338) or (a <= 22): # Pohjoinen 338 - 360 tai 0 - 22
-            tuulisuunta_tulostus = (f"Pohjoistuulta suunnasta {a} astetta")       
+            winddirection_results = (f"Pohjoistuulta suunnasta {a} astetta")       
         elif (a >= 23) and (a <= 67): # Koillinen 23 - 67
-            tuulisuunta_tulostus = (f"Koillistuulta suunnasta {a} astetta") 
+            winddirection_results = (f"Koillistuulta suunnasta {a} astetta") 
         elif (a >= 68) and (a <= 112): # Itä 68 - 112
-            tuulisuunta_tulostus = (f"Itätuulta suunnasta {a} astetta")
+            winddirection_results = (f"Itätuulta suunnasta {a} astetta")
         elif (a >= 113) and (a <= 157): # Kaakko 113 - 157
-            tuulisuunta_tulostus = (f"Kaakkoistuulta suunnasta {a} astetta")
+            winddirection_results = (f"Kaakkoistuulta suunnasta {a} astetta")
         elif (a >= 158) and (a <= 202): # Etelä 158 - 202
-            tuulisuunta_tulostus = (f"Etelätuulta suunnasta {a} astetta")
+            winddirection_results = (f"Etelätuulta suunnasta {a} astetta")
         elif (a >= 203) and (a <= 247): # Lounas 203 - 247
-            tuulisuunta_tulostus = (f"Lounaistuulta suunnasta {a} astetta")
+            winddirection_results = (f"Lounaistuulta suunnasta {a} astetta")
         elif (a >= 248) and (a <= 292): # Länsi 248 - 292
-            tuulisuunta_tulostus = (f"Länsituulta suunnasta {a} astetta")
+            winddirection_results = (f"Länsituulta suunnasta {a} astetta")
         elif (a >= 293) and (a <= 337): # Luode 293 - 337  
-            tuulisuunta_tulostus = (f"Luoteistuulta suunnasta {a} astetta")
+            winddirection_results = (f"Luoteistuulta suunnasta {a} astetta")
         else:
-            tuulisuunta_tulostus = (f"Tuuli suunnasta {a} astetta")
+            winddirection_results = (f"Tuuli suunnasta {a} astetta")
        
-        self.tuulisuunta_tulos = tuulisuunta_tulostus
+        self.winddirection_result = winddirection_results
 
-    def tulosta_haku(self):
-        return self.tuulisuunta_tulos
+    def print_seek(self):
+        return self.winddirection_result
 
 def main():
-    haut = 1
+    seekid = 1
+
     while True:
-        def kokonaisluku():
+        def intcount():
             while True:
                 try:
                     print("Sää tiedon tulokset joulukuu 2022 Oulunsalo")
-                    syote = int(input("Anna haku numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n\
-(4) Tuuli puuskassa\n(5) Tuulen suunta\n(0) Lopetus ja tulostus\n"))
-                    return int(syote)
+                    valuenumber = int(input("Anna haku numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n(4) Tuuli puuskassa\n\
+(5) Tuulen suunta\n(6) Diagrammi joulukuun päivä lämpötiloista\n(7) Lämpötilan ja tuulen nopeuden automaattihaku\n(0) Lopetus ja tulostus\n"))
+                    return int(valuenumber)
                 except ValueError:
                     print()
-                    print("Virheellinen syöte. Anna oikea haku numero kiitos.")
+                    print("Virheellinen syöte. Anna luku, kiitos.")
                     print()
-        Hakutyyppi = kokonaisluku() 
-        if Hakutyyppi == 1:
-            haku = Lampotila(haut, 0 , "", "")
-            Lampotila.ask_paiva(haku)
-            Lampotila.ask_klo(haku)
-            Lampotila.tee_haku(haku)
-            HakuTulokset.append(haku)
-            haut += 1
-        elif Hakutyyppi == 2:
-            haku = Sademaara(haut, 0 , "", "")
-            Sademaara.ask_paiva(haku)
-            Sademaara.ask_klo(haku)
-            Sademaara.tee_haku(haku)
-            HakuTulokset.append(haku)
-            haut += 1
-        elif Hakutyyppi == 3:
-            haku = TuulenNopeus(haut, 0 , "", "")
-            TuulenNopeus.ask_paiva(haku)
-            TuulenNopeus.ask_klo(haku)
-            TuulenNopeus.tee_haku(haku)
-            HakuTulokset.append(haku)
-            haut += 1
-        elif Hakutyyppi == 4:
-            haku = TuuliPuuskassa(haut, 0 , "", "")
-            TuuliPuuskassa.ask_paiva(haku)
-            TuuliPuuskassa.ask_klo(haku)
-            TuuliPuuskassa.tee_haku(haku)
-            HakuTulokset.append(haku)
-            haut += 1
-        elif Hakutyyppi == 5:
-            haku = TuuliSuunta(haut, 0 , "", "")
-            TuuliSuunta.ask_paiva(haku)
-            TuuliSuunta.ask_klo(haku)
-            TuuliSuunta.tee_haku(haku)
-            HakuTulokset.append(haku)
-            haut += 1
-        elif Hakutyyppi == 0:
+        searchtype = intcount() 
+        #print(Hakutyyppi)
+        if searchtype == 1:
+            weather = Temperature(seekid, 0 , "", "")
+            Temperature.ask_day(weather)
+            Temperature.ask_time(weather)
+            Temperature.make_seek(weather)
+            seekresults.append(weather)
+            seekid += 1
+        elif searchtype == 2:
+            weather = Rainfall(seekid, 0 , "", "")
+            Rainfall.ask_day(weather)
+            Rainfall.ask_time(weather)
+            Rainfall.make_seek(weather)
+            seekresults.append(weather)
+            seekid += 1
+        elif searchtype == 3:
+            weather = WindSpeed(seekid, 0 , "", "")
+            WindSpeed.ask_day(weather)
+            WindSpeed.ask_time(weather)
+            WindSpeed.make_seek(weather)
+            seekresults.append(weather)
+            seekid += 1
+        elif searchtype == 4:
+            weather = GustWind(seekid, 0 , "", "")
+            GustWind.ask_day(weather)
+            GustWind.ask_time(weather)
+            GustWind.make_seek(weather)
+            seekresults.append(weather)
+            seekid += 1
+        elif searchtype == 5:
+            weather = WindDirection(seekid, 0 , "", "")
+            WindDirection.ask_day(weather)
+            WindDirection.ask_time(weather)
+            WindDirection.make_seek(weather)
+            seekresults.append(weather)
+            seekid += 1
+        elif searchtype == 6:
+            def temperature_statistic():
+                day_1 = df[df["Time"] == "12:00"] # pandas taulukko parsitaan annetulla klo arvolla
+                a = day_1["Air temperature (degC)"] #
+                temperature_result = a.to_numpy()# method to concert column to numpy array
+                #print(temperature_result)
+                fig1, ax = plt.subplots()
+                fig1 ,ax.set_xlim(1, 31)
+                ax.set_title("Viivakaavio joulukuun päivä lämpötila klo 12:00")
+                ax.set_xlabel("Päivät")
+                ax.set_ylabel('Lämpötila')
+                
+                xpoints = np.array(temperature_result)
+                ypoints = np.array(([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
+                            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]))
+
+                plt.plot(ypoints, xpoints)
+                return(plt.plot)
+
+            plt.plot = temperature_statistic()
+            plt.show()
+
+        elif searchtype == 7:
+            def weather_machineseek():
+                end_time = dt.datetime.now()
+                end_time = end_time - dt.timedelta(minutes=130)
+                output_time = end_time
+                start_time = end_time - dt.timedelta(minutes=1)
+                start_datetime = start_time.isoformat(timespec="seconds") + "Z"
+                end_datetime = end_time.isoformat(timespec="seconds") + "Z" # ->  2020-07-07T12:00:00Z
+                output_datetime = output_time.isoformat(timespec="seconds")
+
+                obs = download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
+                #print(sorted(obs.data.keys()))
+                #print(obs.data)
+                latest_tstep = max(obs.data.keys())
+                temperature_value = obs.data[latest_tstep]["Oulu lentoasema"]["Air temperature"]['value']
+                wind_value = obs.data[latest_tstep]["Oulu lentoasema"]["Wind speed"]['value']
+
+                root = tk.Tk()
+                root.title('Tulostus Sää Tiedot')
+                root.iconbitmap('saa_kuva.ico')
+                root.geometry('300x200+50+50')
+                message = tk.Label(root, text = f"Aika: {output_datetime}")
+                message1 = tk.Label(root, text = f"Oulun lentoaseman lämpötila {temperature_value} astetta")
+                message2 = tk.Label(root, text = f"Oulun lentoaseman tuulen nopeus {wind_value} m/s")
+               
+                message.pack()
+                message1.pack()
+                message2.pack()
+
+                return(root)
+
+            root = weather_machineseek()
+            root.mainloop()# keep the window displaying
+
+        elif searchtype == 0:
             break
         else:
             print()
             print("Virheellinen valinta. Anna oikea haku numero kiitos.")
             print()
 
-    Tulostus = SaaTulostus()
-    Tulostus.tulostus_haku(HakuTulokset)
+    Printout = WeatherResult()
+    Printout.results_seek(seekresults)
 
 #Lopuksi käynnistämme ohjelman pääfunktiosta
 if __name__ == "__main__":
