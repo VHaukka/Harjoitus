@@ -5,9 +5,10 @@ import tkinter as tk
 import datetime as dt
 from fmiopendata.wfs import download_stored_query
 
-"""csv tiedosto haettu ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations 
-Nimetty Weather_Data202212_1h.csv ja tallenettu samaan kansioon koodin kanssa. Koneluetttava haku löytyy samoin 
-ilmatieteenlaitoksen verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data """
+"""csv tiedoston hakee koodin tekijä. Käyttäjä EI VOI TÄTÄ TEHDÄ. Tiedosto on haettu
+ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations. 
+Nimetty Weather_Data202212_1h.csv ja tallenettiin samaan kansioon koodin kanssa. Koneluettava
+haku löytyy samasta verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data """
 
 df = pd.read_csv('Weather_Data202212_1h.csv')
 df = df[:-1] # pandas taulukon viimeinen rivi pois
@@ -16,24 +17,25 @@ seekresults = []
 
 class WeatherResult:
     def results_seek(self, seekresults):
-        
+
+        yearmonth_result = checkyear_month()
         for weather in seekresults:
             print()
-            print("********************************")
-            print("Sään haku tulokset joulukuu 2022")   
+            print("*****************************")
+            print(f"Sään haku tulokset:")                 
             print("Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema")
             print("***************************************************************")
-            print(f"{weather.seekid}. Haku joulukuun {weather.day} päivä kellon ajalle {weather.time}")
+            print(f"{weather.seekid}. Haku {weather.day}.{yearmonth_result[0]} {yearmonth_result[1]} kello {weather.time}")
             print(f"{weather.print_seek()}")
             print()
-         
-
-class WeatherSeek:
+        
+class WeatherSeek():
     def __init__(self, seekid, day, time):
         self.seekid = seekid
         self.day = day
         self.time = time
-       
+
+
     def ask_day(self):
         def day_check():
             while True:
@@ -171,16 +173,76 @@ class WindDirection(WeatherSeek):
     def print_seek(self):
         return self.winddirection_result
 
+def temperature_statistic():
+
+    day_1 = df[df["Time"] == "12:00"] # pandas taulukko parsitaan annetulla klo arvolla
+    a = day_1["Air temperature (degC)"] #
+    temperature_result = a.to_numpy()# method to concert column to numpy array
+
+    #print(temperature_result)
+    fig1, ax = plt.subplots()
+    fig1 ,ax.set_xlim(1, 31)
+    ax.set_title("Kuukauden päivä lämpötila kello 12:00")
+    ax.set_xlabel("Päivät")
+    ax.set_ylabel('Lämpötila')
+                
+    xpoints = np.array(temperature_result)
+    ypoints = np.array(([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
+                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]))
+    plt.plot(ypoints, xpoints)
+
+    return(plt.plot)
+
+def weather_machineseek():
+    end_time = dt.datetime.now()
+    end_time = end_time - dt.timedelta(minutes=130)
+    output_time = end_time
+    start_time = end_time - dt.timedelta(minutes=1)
+    start_datetime = start_time.isoformat(timespec="seconds") + "Z"
+    end_datetime = end_time.isoformat(timespec="seconds") + "Z" # ->  2020-07-07T12:00:00Z
+    output_datetime = output_time.isoformat(timespec="seconds")
+
+    obs = download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
+    
+    latest_tstep = max(obs.data.keys())
+    temperature_value = obs.data[latest_tstep]["Oulu lentoasema"]["Air temperature"]['value']
+    wind_value = obs.data[latest_tstep]["Oulu lentoasema"]["Wind speed"]['value']
+
+    root = tk.Tk()
+    root.title('Tulostus tiedot')
+    root.iconbitmap('saa_kuva.ico')
+    root.geometry('300x200+50+50')
+    message = tk.Label(root, text = f"Aika: {output_datetime}")
+    message1 = tk.Label(root, text = f"Oulun lentoaseman lämpötila {temperature_value} astetta")
+    message2 = tk.Label(root, text = f"Oulun lentoaseman tuulen nopeus {wind_value} m/s")         
+    message.pack()
+    message1.pack()
+    message2.pack()
+
+    return(root)
+
+def checkyear_month():
+        
+    month = (df.m.head(1)) 
+    month = str(month.to_string(index=False))
+    year = (df.Year.head(1))  
+    year = str(year.to_string(index=False))
+   
+    return month, year
+
 def main():
+    yearmonth_result = checkyear_month()
     seekid = 1
 
     while True:
         def intcount():
             while True:
                 try:
-                    print("Sää tiedon tulokset joulukuu 2022 Oulunsalo")
+                    print()
+                    print(f"Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema")
+                    print(f"Tilasto kuukausi {yearmonth_result[0]} vuosi {yearmonth_result[1]}")
                     valuenumber = int(input("Anna haku numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n(4) Tuuli puuskassa\n\
-(5) Tuulen suunta\n(6) Diagrammi joulukuun päivä lämpötiloista\n(7) Lämpötilan ja tuulen nopeuden automaattihaku\n(0) Lopetus ja tulostus\n"))
+(5) Tuulen suunta\n(6) Diagrammi kuukauden päivä lämpötiloista\n(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n(0) Lopetus ja tulostus\n"))
                     return int(valuenumber)
                 except ValueError:
                     print()
@@ -224,61 +286,11 @@ def main():
             seekresults.append(weather)
             seekid += 1
         elif searchtype == 6:
-            def temperature_statistic():
-                day_1 = df[df["Time"] == "12:00"] # pandas taulukko parsitaan annetulla klo arvolla
-                a = day_1["Air temperature (degC)"] #
-                temperature_result = a.to_numpy()# method to concert column to numpy array
-                #print(temperature_result)
-                fig1, ax = plt.subplots()
-                fig1 ,ax.set_xlim(1, 31)
-                ax.set_title("Viivakaavio joulukuun päivä lämpötila klo 12:00")
-                ax.set_xlabel("Päivät")
-                ax.set_ylabel('Lämpötila')
-                
-                xpoints = np.array(temperature_result)
-                ypoints = np.array(([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
-                            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]))
-
-                plt.plot(ypoints, xpoints)
-                return(plt.plot)
-
             plt.plot = temperature_statistic()
             plt.show()
-
         elif searchtype == 7:
-            def weather_machineseek():
-                end_time = dt.datetime.now()
-                end_time = end_time - dt.timedelta(minutes=130)
-                output_time = end_time
-                start_time = end_time - dt.timedelta(minutes=1)
-                start_datetime = start_time.isoformat(timespec="seconds") + "Z"
-                end_datetime = end_time.isoformat(timespec="seconds") + "Z" # ->  2020-07-07T12:00:00Z
-                output_datetime = output_time.isoformat(timespec="seconds")
-
-                obs = download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
-                #print(sorted(obs.data.keys()))
-                #print(obs.data)
-                latest_tstep = max(obs.data.keys())
-                temperature_value = obs.data[latest_tstep]["Oulu lentoasema"]["Air temperature"]['value']
-                wind_value = obs.data[latest_tstep]["Oulu lentoasema"]["Wind speed"]['value']
-
-                root = tk.Tk()
-                root.title('Tulostus Sää Tiedot')
-                root.iconbitmap('saa_kuva.ico')
-                root.geometry('300x200+50+50')
-                message = tk.Label(root, text = f"Aika: {output_datetime}")
-                message1 = tk.Label(root, text = f"Oulun lentoaseman lämpötila {temperature_value} astetta")
-                message2 = tk.Label(root, text = f"Oulun lentoaseman tuulen nopeus {wind_value} m/s")
-               
-                message.pack()
-                message1.pack()
-                message2.pack()
-
-                return(root)
-
             root = weather_machineseek()
-            root.mainloop()# keep the window displaying
-
+            root.mainloop() # keep the window displaying
         elif searchtype == 0:
             break
         else:
