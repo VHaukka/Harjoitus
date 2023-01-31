@@ -8,10 +8,12 @@ from fmiopendata.wfs import download_stored_query
 """csv tiedoston hakee koodin tekijä. Käyttäjä EI VOI TÄTÄ TEHDÄ. Tiedosto on haettu
 ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations. 
 Nimetty Weather_Data202212_1h.csv ja tallenettiin samaan kansioon koodin kanssa. Koneluettava
-haku löytyy samasta verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data """
+haku löytyy samasta verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data 
+csv tiedosto tammikuu 2023. Ohjelman haut 1 - 6 tästä aineistosta """
 
+#df = pd.read_csv('Weather_Data202301_1h.csv')
 df = pd.read_csv('Weather_Data202212_1h.csv')
-df = df[:-1] # pandas taulukon viimeinen rivi pois
+df = df[:-1] # pandas cut last rows
 
 seekresults = []
 
@@ -40,9 +42,9 @@ class WeatherSeek():
         def day_check():
             while True:
                 try:
-                    day = int(input("Anna haku päivä (1-31): "))
-                    if day >= 1 and day <= 31:
-                        return int(day) # palutetaan päivän haku arvo funktiolle
+                    day = int(input("Anna haku päivä (1-31): ")) 
+                    if day >= 1 and day <= 31: 
+                        return int(day) 
                     else:
                         print()
                         print("Virheellinen syöte. Anna oikea päivä, kiitos.")
@@ -241,15 +243,16 @@ def main():
                     print()
                     print(f"Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema")
                     print(f"Tilasto kuukausi {yearmonth_result[0]} vuosi {yearmonth_result[1]}")
-                    valuenumber = int(input("Anna haku numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n(4) Tuuli puuskassa\n\
-(5) Tuulen suunta\n(6) Diagrammi kuukauden päivä lämpötiloista\n(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n(0) Lopetus ja tulostus\n"))
+                    valuenumber = int(input("Anna halutun mittaustuloksen numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n(4) Tuuli puuskassa\n\
+(5) Tuulen suunta\n(6) Diagrammi tilasto kuukauden päivä lämpötiloista (kello 12:00)\n(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n\
+(0) Lopetus ja tulostus\n"))
                     return int(valuenumber)
                 except ValueError:
                     print()
                     print("Virheellinen syöte. Anna luku, kiitos.")
                     print()
         searchtype = intcount() 
-        #print(Hakutyyppi)
+        
         if searchtype == 1:
             weather = Temperature(seekid, 0 , "", "")
             Temperature.ask_day(weather)
@@ -301,6 +304,6 @@ def main():
     Printout = WeatherResult()
     Printout.results_seek(seekresults)
 
-#Lopuksi käynnistämme ohjelman pääfunktiosta
+#Program Start main() function
 if __name__ == "__main__":
     main()
