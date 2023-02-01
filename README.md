@@ -14,7 +14,35 @@ selvittämisestä erisellä projektityön esittely tunnilla. Esitelmää varten 
 esityksen. Tämä esittely tuli tarpeeseen. Oli hyvä että alustus tehtiin rauhassa ennen kuin riennettiin ohjelma 
 koodin kirjoittamiseen.
 
+# Ohjelman toiminta
+
+Toiminta on yksinkertainen. Ohjelma käynnistetään Visual Studio Code ympäristössä Crtl + F5 tai VSCode terminaalista 
+komenolla python weatherSearch.py. Ohjelmaa käytetään terminaalissa näkyvän käyttöliittymä kautta. Käyttäjä voi hakea
+valinalla 1-5 koneelta olevalta csv tidostolta kuukauden säätietojen arvoja. Näissä valinoissa käyttäjältä kysytään
+päivän ja kello aika. 6 valinalla tulostetaan diagrammi koko kuukauden päivälämpötiloista samasta csv tiedostosta. 
+7 valita tulostaa parin tunnin takaisen lämpötilan ja sademäärän Oulun lentoaseman mittauspisteeltä. Tässä toiminassa 
+tehdään automaattihaku ilmaiteteenlaitoksen koneluettevaan palveluun. 
+Ohjelma lopetaan ja tulostetaan tehdyt haut valinalla 0. Tulostus juoksevalla numeroinilla, tehtyjen hakuja mukaan 
+alla esimerkki tulosteesta. 
+
+Sään haku tulokset:
+Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
+***************************************************************
+1. Haku 5.1 2023 kello 06:00
+Lämpötila -7.3 astetta
+
+
+*****************************
+Sään haku tulokset:
+Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
+***************************************************************
+2. Haku 1.1 2023 kello 23:00
+Luoteistuulta suunnasta 302 astetta
+
 # Ohjelman rakenne
+
+
+
 
 
 
