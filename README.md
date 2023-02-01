@@ -18,12 +18,12 @@ koodin kirjoittamiseen.
 
 Toiminta on yksinkertainen. Ohjelma käynnistetään Visual Studio Code ympäristössä Crtl + F5 tai VSCode terminaalista 
 komenolla python weatherSearch.py. Ohjelmaa käytetään terminaalissa näkyvän käyttöliittymä kautta. Käyttäjä voi hakea
-valinalla 1-5 koneelta olevalta csv tidostolta kuukauden säätietojen arvoja. Näissä valinoissa käyttäjältä kysytään
-päivän ja kello aika. 6 valinalla tulostetaan diagrammi koko kuukauden päivälämpötiloista samasta csv tiedostosta. 
+valinalla 1-5 koneelta olevalta csv tiedostolta kuukauden säätietojen arvoja. Näissä valinoissa käyttäjältä kysytään
+päivän ja kello aika. 6 valinalla tulostetaan diagrammi koko kuukauden päivälämpötiloista tiedot haetaan samasta
+csv tiedostosta. 
 7 valita tulostaa parin tunnin takaisen lämpötilan ja sademäärän Oulun lentoaseman mittauspisteeltä. Tässä toiminassa 
-tehdään automaattihaku ilmaiteteenlaitoksen koneluettevaan palveluun. 
-Ohjelma lopetaan ja tulostetaan tehdyt haut valinalla 0. Tulostus juoksevalla numeroinilla, tehtyjen hakuja mukaan 
-alla esimerkki tulosteesta. 
+tehdään automaattihaku ilmaiteteenlaitoksen koneluettevaan palveluun. Ohjelma lopetaan ja tulostetaan tehdyt haut 
+valinalla 0. Tulostus juoksevalla numeroinilla, tehtyjen hakuja mukaan alla esimerkki tulosteesta. 
 
 Sään haku tulokset:
 Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
@@ -40,6 +40,15 @@ Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
 Luoteistuulta suunnasta 302 astetta
 
 # Ohjelman rakenne
+
+Ohjelmassa on seitsemän luokkaa, kolme funktioa ja main funkio. Alustus tiedoissa import tarvittavat modullit joita tässä 
+on kuusi kappaletta. Alussa kerrotaan kommentissa csv tiedoston haku ja ohjelman rajoiteet. Avataan tiedosto 
+pandas taulukkoon myöhempää käyttöä varten. Luodaan tyhjä seekresults lista hakutietojen talletusta varten. 
+Ohjelma käynnistyy main funktiosta. Alussa kutsutaan checkyear_month() funktiosta kuukausi ja vuosi tiedot tulostus
+parametrejä varten. Luodaan haku laskuri seekid. While true silmukassa pyörii käyttöliittymä , josta tehdään käyttäjän 
+valinnat. Silmukassa try except virheen korjaus jos valinassa annetaan jotain muuta kuin numero arvo. Valinta numero 
+palautetaan intcount funktion arvoksi. Tästä tulee searchtype arvo jolla tehdään if else haaran valinta. 
+ 
 
 
 
