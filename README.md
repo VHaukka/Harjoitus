@@ -49,7 +49,7 @@ parametrejä varten. Luodaan haku laskuri seekid. While true silmukassa pyörii 
 valinnat. Alla kuva käyttöliittymän silmukasta. 
 
 Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
-Tilasto kuukausi 1 vuosi 2023
+Tilasto kuukausi 1 vuosi 2023 
 Anna halutun mittaustuloksen numero:
 (1) Lämpötila
 (2) Sademäärä
@@ -93,8 +93,9 @@ tämän tehtävän automaattihakupolku.
 
 download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
 
-Palvelu on WFS palvelu joka tarkoittaa, että kyselyt tulee tehdä tallennettujen kyselyiden avulla. Latauksessa käytetään StoredQueries kyselyjä. Tämän ohjelman data määrä on pieni joten lopullisen arvoin sain parsittua melko helposti. Nämä kaksi arvoa näytetään 
-tkinter modullin avulla omalle pienelle ikkunalle. 
+Palvelu on WFS palvelu joka tarkoittaa, että kyselyt tulee tehdä tallennettujen kyselyiden avulla. Latauksessa käytetään 
+StoredQueries kyselyjä. Tämän ohjelman data määrä on pieni joten lopullisen arvoin sain parsittua melko helposti. Nämä kaksi 
+arvoa näytetään tkinter modullin avulla omalle pienelle ikkunalle. 
 
 # Lopuksi 
 
@@ -105,9 +106,9 @@ csv tiedostoa.
 
 # Huomioitavaa
 
-Palvelussa käytössä UTC-aika vaikuttaa automaattihakuun. Csv tiedosto voi palauttaa NaN tuloksen 
-joka tarkoittaa että havaintotieto puuttuu kokonaan. Lukema -1 sademäärässä ei ole virhe vaan tarkoittaa ettei ole satanut 
-lainkaan. Lukema 0 tarkoittaa että on satanut, mutta sadetta ei ole kertynyt edes 0,1 mm.
+Palvelussa käytössä UTC-aika huomioitava automaattihaun aikaleimassa. Csv tiedosto voi palauttaa NaN tuloksen, 
+joka tarkoittaa että havaintotieto puuttuu kokonaan. Lukema -1 sademäärässä ei ole virhe vaan tarkoittaa ettei 
+ole satanut lainkaan. Lukema 0 tarkoittaa että on satanut, mutta sadetta ei ole kertynyt edes 0,1 mm.
 
 
 
