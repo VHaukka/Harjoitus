@@ -62,9 +62,9 @@ Anna halutun mittaustuloksen numero:
 
 Silmukassa try except virheen korjaus jos valinassa annetaan jotain muuta kuin numero arvo. Valinta numero 
 palautetaan intcount funktion arvoksi. Tästä saadaan searchtypelle arvo jolla tehdään if else haaran valinta.
-Ennen valintaa kutsutaan maxseek funktio, jolla tarkitetaan hakukertojen määrä. Lukeman ylityessä tulostetaan 
+Ennen valintaa kutsutaan maxseek funktio, jolla tarkistetaan hakukertojen määrä. Lukeman ylityessä tulostetaan 
 tästä viesti ja ohjelma lopetaan tehtyjen hakujen tulostukseen. Haaran valinnat 1-5 ovat samakaltaiset, käyn läpi 
-1 valinnan.Valmistetaan weather luokka olio johon saadaan temperature luokkaa kutsuttaessa muuttujat 
+1 valinnan. Valmistetaan weather luokka olio johon saadaan temperature luokkaa kutsuttaessa muuttujat 
 seekid, day, time, ja temperature_result. Haetaan näille arvot seekid on 1 ensimäisessä haussa. WeatherSeek luokassa 
 metodit ask_day ja ask_time. Nämä on perittynä temperature luokassa. Näissä annetaan käyttäjän valinta halutulle 
 päivälle ja kellon ajalle. Virheen korjaukset on huomioitu noissa, siltä varalta että käyttäjä syöttää väärän arvon. 
