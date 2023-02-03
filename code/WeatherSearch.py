@@ -9,10 +9,10 @@ from fmiopendata.wfs import download_stored_query
 ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations. 
 Nimetty Weather_Data202212_1h.csv ja tallenettiin samaan kansioon koodin kanssa. Koneluettava
 haku löytyy samasta verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data 
-csv tiedosto tammikuu 2023. Ohjelman haut 1 - 6 tästä aineistosta """
+csv tiedosto tammikuu 2023. Ohjelman haut 1 - 6  tehdään tästä aineistosta """
 
-#df = pd.read_csv('Weather_Data202301_1h.csv')
-df = pd.read_csv('Weather_Data202212_1h.csv')
+df = pd.read_csv('Weather_Data202301_1h.csv')
+#df = pd.read_csv('Weather_Data202212_1h.csv')
 df = df[:-1] # pandas cut last rows
 
 seekresults = []
@@ -62,8 +62,8 @@ class WeatherSeek():
             "12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
             timetemp = []
             timetemp.append(time)
-            if any(same_value in result for same_value in timetemp): # jos sama arvo löytyy molemmista taulukoista klo syöte ok. 
-                self.time = time
+            if any(same_value in result for same_value in timetemp): # if same value find bouth array time input ok. 
+                self.time = time 
                 break
             else:
                 print()
@@ -74,9 +74,7 @@ class Temperature(WeatherSeek):
     def __init__(self, seekid, day, time, temperature_results):
         super().__init__(seekid, day, time)
         self.temperature_result = temperature_results
-
     def make_seek(self):
-        
         day_1 = df[df["Time"] == self.time] # pandas taulukko parsitaan annetulla klo arvolla
         day_2 = day_1[day_1["d"] == self.day] #parsitaan annetulla paivan arvolla  
     
@@ -179,25 +177,24 @@ def temperature_statistic():
 
     day_1 = df[df["Time"] == "12:00"] # pandas taulukko parsitaan annetulla klo arvolla
     a = day_1["Air temperature (degC)"] #
-    temperature_result = a.to_numpy()# method to concert column to numpy array
+    temperature_resultaamu = a.to_numpy()# method to concert column to numpy array
 
-    #print(temperature_result)
     fig1, ax = plt.subplots()
     fig1 ,ax.set_xlim(1, 31)
-    ax.set_title("Kuukauden päivä lämpötila kello 12:00")
+    ax.set_title("Kuukauden päivä lämpötilat kello 12:00")
     ax.set_xlabel("Päivät")
     ax.set_ylabel('Lämpötila')
-                
-    xpoints = np.array(temperature_result)
+    
+    xpoints = np.array(temperature_resultaamu)
     ypoints = np.array(([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
                     17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]))
-    plt.plot(ypoints, xpoints)
+    plt.plot(ypoints, xpoints, color="b")
 
     return(plt.plot)
 
 def weather_machineseek():
     end_time = dt.datetime.now()
-    end_time = end_time - dt.timedelta(minutes=130)
+    end_time = end_time - dt.timedelta(minutes=130) # macine seek use UTC time. Must minus 2h(10min just in case )
     output_time = end_time
     start_time = end_time - dt.timedelta(minutes=1)
     start_datetime = start_time.isoformat(timespec="seconds") + "Z"
@@ -211,12 +208,12 @@ def weather_machineseek():
     wind_value = obs.data[latest_tstep]["Oulu lentoasema"]["Wind speed"]['value']
 
     root = tk.Tk()
-    root.title('Tulostus tiedot')
+    root.title('Tulostus')
     root.iconbitmap('saa_kuva.ico')
-    root.geometry('300x200+50+50')
+    #root.geometry('300x200')#+50+50
     message = tk.Label(root, text = f"Aika: {output_datetime}")
     message1 = tk.Label(root, text = f"Oulun lentoaseman lämpötila {temperature_value} astetta")
-    message2 = tk.Label(root, text = f"Oulun lentoaseman tuulen nopeus {wind_value} m/s")         
+    message2 = tk.Label(root, text = f" Oulun lentoaseman tuulen nopeus {wind_value} m/s ")         
     message.pack()
     message1.pack()
     message2.pack()
@@ -232,26 +229,47 @@ def checkyear_month():
    
     return month, year
 
+def maxseek(seekvalue: int, searchtypevalue: int):
+    
+    if searchtypevalue == 0 or searchtypevalue == 6 or searchtypevalue == 7:
+        end = searchtypevalue
+        return end
+    elif searchtypevalue >= 8:
+        end = searchtypevalue
+        return end
+    elif seekvalue > 20:
+        print("Haku kerrat täynä !") 
+        end = 0 
+        return end
+    else:
+        end = searchtypevalue
+        return end
+
 def main():
+
     yearmonth_result = checkyear_month()
     seekid = 1
 
     while True:
+
         def intcount():
             while True:
                 try:
                     print()
                     print(f"Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema")
                     print(f"Tilasto kuukausi {yearmonth_result[0]} vuosi {yearmonth_result[1]}")
-                    valuenumber = int(input("Anna halutun mittaustuloksen numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n(4) Tuuli puuskassa\n\
-(5) Tuulen suunta\n(6) Diagrammi tilasto kuukauden päivä lämpötiloista (kello 12:00)\n(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n\
-(0) Lopetus ja tulostus\n"))
+                    valuenumber = int(input("Anna halutun mittaustuloksen numero:\n(1) Lämpötila\n(2) Sademäärä\n(3) Tuulen nopeus\n\
+(4) Tuuli puuskassa\n(5) Tuulen suunta\n(6) Diagrammi tilasto kuukauden päivä lämpötiloista (kello 12:00)\n\
+(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n(0) Lopetus ja tulostus\n"))
                     return int(valuenumber)
                 except ValueError:
                     print()
                     print("Virheellinen syöte. Anna luku, kiitos.")
                     print()
         searchtype = intcount() 
+
+        end_value = maxseek(seekid, searchtype)
+        searchtype = end_value
         
         if searchtype == 1:
             weather = Temperature(seekid, 0 , "", "")
