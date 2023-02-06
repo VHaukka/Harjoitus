@@ -9,10 +9,10 @@ from fmiopendata.wfs import download_stored_query
 ilmatieteenlaitoksen verkkosivuilta. https://en.ilmatieteenlaitos.fi/download-observations. 
 Nimetty Weather_Data202301_1h.csv ja tallenettiin samaan kansioon koodin kanssa. Koneluettava
 haku löytyy samasta verkkoympäristöstä. https://www.ilmatieteenlaitos.fi/avoin-data 
-Csv tiedosto tammikuu 2023. Ohjelman haut 1 - 6  tehdään tästä aineistosta """
+Csv tiedosto tammikuu 2023. Ohjelman haut 1 - 6 tehdään tästä aineistosta """
 
 df = pd.read_csv('Weather_Data202301_1h.csv')
-df = df[:-1] # pandas cut last rows
+df = df[:-1] # pandas array cut last row
 seekresults = []
 
 class WeatherResult:
@@ -71,7 +71,7 @@ class WeatherSeek():
 
 class Temperature(WeatherSeek):
     def __init__(self, seekid, day, time, temperature_results):
-        super().__init__(seekid, day, time) # 
+        super().__init__(seekid, day, time) # collecting class WeatherSeek values 
         self.temperature_result = temperature_results
     def make_seek(self):
         day_1 = df[df["Time"] == self.time] # pandas array parse time value
@@ -203,9 +203,10 @@ def weather_machineseek():
     # fmi macineseek use StoredQueries, fmisid=101786 Oulu lentoaseman id number 
     obs = download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
     latest_tstep = max(obs.data.keys())# The next level has the names of the observation stations as keys
-    
-    temperature_value = obs.data[latest_tstep]["Oulu lentoasema"]["Air temperature"]['value'] 
-    wind_value = obs.data[latest_tstep]["Oulu lentoasema"]["Wind speed"]['value'] 
+    place_step = max(obs.data[latest_tstep].keys()) # place_step = Oulu lentoasema
+
+    temperature_value = obs.data[latest_tstep][place_step]["Air temperature"]['value'] # get Air temperature value result
+    wind_value = obs.data[latest_tstep][place_step]["Wind speed"]['value'] # get Wind speed value result
 
     root = tk.Tk()
     root.title('Tulostus')
@@ -222,9 +223,9 @@ def weather_machineseek():
 
 def checkyear_month():
         
-    month = (df.m.head(1)) # pandas array parse month value
+    month = (df.m.head(1)) # pandas array parse column first month value
     month = str(month.to_string(index=False)) # cut array number index 
-    year = (df.Year.head(1)) # pandas array parse column "Year" first value 
+    year = (df.Year.head(1)) # pandas array parse column year first value 
     year = str(year.to_string(index=False))
    
     return month, year
@@ -238,7 +239,9 @@ def maxseek(seekvalue: int, searchtypevalue: int):
         end = searchtypevalue
         return end
     elif seekvalue > 20: # max 20 
-        print("Haku kerrat täynä !") 
+        print()
+        print("20 Hakua tehty, kerrat täynä !") 
+        print("Ohjelma lopetaan ja tulostetaan haut")
         end = 0 
         return end
     else:
@@ -260,7 +263,7 @@ def main():
                     print(f"Tilasto kuukausi {yearmonth_result[0]} vuosi {yearmonth_result[1]}")
                     valuenumber = int(input("Anna halutun mittaustuloksen numero:\n(1) Lämpötila\n(2) Sademäärä\n\
 (3) Tuulen nopeus\n(4) Tuuli puuskassa\n(5) Tuulen suunta\n(6) Diagrammi kuukauden lämpötiloista (kello 12:00)\n\
-(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n(0) Lopetus ja tulostus\n"))
+(7) Päivän lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)\n(0) Lopetus ja tulostus\n"))
                     return int(valuenumber)
                 except ValueError:
                     print()

@@ -4,14 +4,14 @@ Tehtävän alustava kuvaus. Sää tietojen haku www sivuilta. Talletus ja näytt
 
 # Python haku ohjelma tammikuun 2023 säätiedoista
 
-Tehtävänä on harjoitus projekti Codenowpython ja AI kurssin lopuksi. Tässä readme filessä on kerrottu lyhyesti 
-tekemäni ohjelman toiminta ja rakenne. 
+Tehtävänä oli harjoitus projekti Codenowpython ja AI kurssin lopuksi. Tässä readme filessä on kerrottu lyhyesti 
+tekemäni ohjelman toiminta ja rakenne.
 Aihe projekti työn tekemiseen oli vaapaa. Valitsin sää tietojen hakemiseen ja tulostamiseen soveltuvan 
 pienene python ohjelman. Lähtökohtana pidin tekemisessä yksinkertaista ohjelmaa. Ei mitään liian laajaa 
 vaikeasti toteutettavaa. Tässä onnistuin omasta mielestä, mutta tuli kyllä mietittyä että oliko sittenkin 
 liian suppea sovellus. Mutta näillä mentiin maaliin. Tekeminen lähti UML mallin rakentamisesta ja suunnitelman 
 selvittämisestä erisellä projektityön esittely tunnilla. Esitelmää varten tein muutaman sivun Powerpoint 
-esityksen. Tämä esittely tuli tarpeeseen. Oli hyvä että alustus tehtiin rauhassa ennen kuin riennettiin ohjelma 
+esityksen. Tämä esittely tuli tarpeeseen. Oli hyvä että alustus tehtiin rauhassa ennen kuin riennettiin ohjelman 
 koodin kirjoittamiseen.
 
 # Ohjelman toiminta
@@ -19,7 +19,7 @@ koodin kirjoittamiseen.
 Toiminta on yksinkertainen. Ohjelma käynnistetään Visual Studio Code ympäristössä Crtl + F5 tai terminaalista 
 komenolla python weatherSearch.py. Ohjelmaa käytetään terminaalissa näkyvän käyttöliittymän kautta. Käyttäjä voi hakea
 valinalla 1-5 koneelta olevalta csv tiedostolta kuukauden säätietojen arvoja. Näissä valinoissa käyttäjältä kysytään
-päivä ja kellon aika. Tässä on tehty maksimi hakujen määrän rajoitus 20 kappaleeseen. 6 valinalla tulostetaan diagrammi 
+päivä ja kellon aika. Tässä tehtiin maksimi hakujen määrän rajoitus 20 kappaleeseen. 6 valinalla tulostetaan diagrammi 
 koko kuukauden päivälämpötiloista tiedot haetaan samasta csv tiedostosta. 
 7 valita tulostaa parin tunnin takaisen lämpötilan ja sademäärän Oulun lentoaseman mittauspisteeltä. Tässä toiminassa 
 tehdään automaattihaku ilmatieteenlaitoksen koneluettevaan palveluun. Ohjelma lopetaan ja tulostetaan tehdyt haut 
@@ -48,7 +48,7 @@ Ohjelma käynnistyy main funktiosta. Kutsutaan checkyear_month() funktiosta kuuk
 parametrejä varten. Luodaan haku laskuri seekid. While true silmukassa pyörii käyttöliittymä, josta tehdään käyttäjän 
 valinnat. Alla näkymä käyttöliittymästä. 
 
-Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema
+Ilmatieteen laitos (OpenData) Oulunsalo Pellonpään mittausasema       
 Tilasto kuukausi 1 vuosi 2023
 Anna halutun mittaustuloksen numero:
 (1) Lämpötila
@@ -57,7 +57,7 @@ Anna halutun mittaustuloksen numero:
 (4) Tuuli puuskassa
 (5) Tuulen suunta
 (6) Diagrammi kuukauden lämpötiloista (kello 12:00)
-(7) Lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)
+(7) Päivän lämpötila ja tuulen nopeus Oulun Lentoasema(machine search)
 (0) Lopetus ja tulostus
 
 Silmukassa try except virheen korjaus jos valinassa annetaan jotain muuta kuin numero arvo. Valinta numero 
@@ -86,10 +86,10 @@ Saadut muuttuja arvot viedään nympy taulukkoon. Tästä taulukosta saadaan kä
 graaffinen viivadiagrammi esitys. Lämpöaste, päivämäärä ja näihin arvoihin piirettynä viiva esitys lämpötiloista.
 Valinta 7 tulostaa parin tunnin takaisen lämpötilan ja tuulen nopeuden arvon Oulun lentoasemalta. Arvot haetaan kellon 
 ajan avulla ilmatieteenlaitoksen konehakupalvelusta. Tässä tarvitaan apuna modullit datetime ja fmiopendata.wfs. 
-Hakupolkuun tarvitaan aloitus ja lopetus aika muodossa 2023-02-02T07:02:16Z. Otin aloitus ja lopetus ajan väliksi 
-minuutin että datapaketti ei paisunut isoksi. Lisäksi hakuun vaaditaan paikkatieto. Käytin fmisid numeroa,
-ilmateiteenlaitoksen verkkosivuilla on listattuna kaikille havaintoasemille oma id tunnus numero. Hakupolun alku määrittää 
-mitä tietoa haetaan onko sää tutka vai merihavaintoja. Merkeillä :: ja & eritellään hakuparametrit. Tuossa alla on 
+Hakupolkuun tarvitaan aloitus ja lopetus aika muodossa 2023-02-02T07:02:16Z. Aloitus ja lopetus ajan väliksi 
+valitsin tässä ohjelmassa minuutti lisäksi hakuun vaaditaan paikkatieto jossa käytin fmisid numeroa.
+Ilmateiteenlaitoksen verkkosivuilla on listattuna kaikille havaintoasemille oma id tunnus numero. Hakupolun alku määrittää 
+mitä tietoa haetaan onko sää, tutka vai merihavaintoja. Merkeillä :: ja & eritellään hakuparametrejä. Tuossa alla on 
 tämän tehtävän automaattihakupolku. 
 
 download_stored_query(f"fmi::observations::weather::multipointcoverage&fmisid=101786&starttime={start_datetime}&endtime={end_datetime}&")
@@ -102,7 +102,7 @@ arvoa näytetään tkinter modullin avulla omaan GUI ikkunaan.
 
 Tässä on kerrottu pienen python ohjelman rakenne. Käyttöliittymä pyörii while true silmukassa jossa kuljetaan valittuun 
 if else haaran toimintaan. Else haara ilmoittaa väärästä numero valinnasta 0 valinta lopetti ohjelman ja tulostaa kaikki 
-tehdyt haut. Yksi automaattihaku muissa haku valinoissa käytetään koneelle valmiiksi ladattua csv tiedostoa.   
+tehdyt haut. Yksi automaattihaku, muissa haku valinoissa käytetään koneelle valmiiksi ladattua csv tiedostoa.   
 
 # Huomioitavaa
 
